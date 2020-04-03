@@ -44,7 +44,8 @@ meanData = studentDataEnc.groupby('final_result').mean()
 print('Mean Data:')
 print(meanData.head())
 
-
+# Heatmap to show where data is missing
+sns.heatmap(studentData.isnull(),yticklabels=False,cbar=False,cmap='viridis')
 
 table=pd.crosstab(studentData.gender, studentData.final_result)
 table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
@@ -81,6 +82,19 @@ plt.xlabel('Age Band')
 plt.ylabel('Final Result')
 plt.savefig('agebands_grade')
 
+table=pd.crosstab(studentData.imd_band, studentData.final_result)
+table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+plt.title('Stacked Bar Chart of imd band vs Final Result')
+plt.xlabel('IMD Band')
+plt.ylabel('Final Result')
+plt.savefig('imdband_grade')
+
+table=pd.crosstab(studentData.num_of_prev_attempts, studentData.final_result)
+table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+plt.title('Stacked Bar Chart of Previous Attempts vs Final Result')
+plt.xlabel('Previous attempts')
+plt.ylabel('Final Result')
+plt.savefig('prevattempts_grade')
 
 # Using Skicit-learn to split data into training and testing sets
 from sklearn.model_selection import train_test_split
@@ -95,7 +109,7 @@ print('Testing Labels Shape:', test_labels.shape)
 # Import the model we are using
 from sklearn.ensemble import RandomForestClassifier
 # Instantiate model with 1000 decision trees
-rf = RandomForestClassifier(n_estimators = 10, bootstrap = True)
+rf = RandomForestClassifier(n_estimators = 10, max_depth=3, bootstrap = True)
 # Train the model on training data
 rf.fit(train_features, train_labels);
 
@@ -168,7 +182,6 @@ logmodel.fit(X_train, y_train)
 #predictions
 logPredictions = logmodel.predict(X_test)
 
-print(metrics.f1_score(y_test, logPredictions, average='weighted', labels=np.unique(logPredictions)))
 print(classification_report(y_test, logPredictions))
 
 print('confusion matrix')
