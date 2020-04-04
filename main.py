@@ -7,8 +7,10 @@ print(studentData.groupby("final_result").count())
 # Remove student entries where results are "Withdrawn" or "Distinction"
 # This is because we are going to be doing binary classification
 # Between Pass and Fail
+studentData.drop(columns= ["id_student"], axis=1, inplace=True)
 studentData = studentData[studentData.final_result != "Withdrawn"]
 studentData = studentData[studentData.final_result != "Distinction"]
+
 
 #Dropping rows with missing data. Heatmap shows there is some data missing for imd_band
 studentData = studentData.dropna()
@@ -19,14 +21,15 @@ studentData = studentData.dropna()
 count = 0
 i = 0
 iList = []
-while count < 5022:
-    if studentData.iloc[i][11] == "Pass":
+while count < 5000:
+    if studentData.iloc[i][10] == "Pass":
+        studentData.drop(index=studentData.index[i], inplace = True)
         iList.append(studentData.index[i])
-        i += 1
         count += 1
+        i+=1
     else:
         i += 1
-studentData.drop(index = iList, inplace = True)
+
 
 # Replace values 'Fail' and 'Pass' in final_result with 0 and 1 respectively
 studentData["final_result"] = studentData["final_result"].replace("Fail", 0)
@@ -117,6 +120,27 @@ sns.heatmap(studentData.isnull(),yticklabels=False,cbar=False,cmap='viridis')
 # plt.xlabel('Previous attempts')
 # plt.ylabel('Final Result')
 # plt.savefig('prevattempts_grade')
+
+# table=pd.crosstab(studentData.code_module, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of Module Code vs Final Result')
+# plt.xlabel('Module code')
+# plt.ylabel('Final Result')
+# plt.savefig('codemodule_grade')
+#
+# table=pd.crosstab(studentData.code_presentation, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of Presentation code vs Final Result')
+# plt.xlabel('Presentation code')
+# plt.ylabel('Final Result')
+# plt.savefig('codepresentation_grade')
+
+table=pd.crosstab(studentData.studied_credits, studentData.final_result)
+table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+plt.title('Stacked Bar Chart of Studied Credits vs Final Result')
+plt.xlabel('Studied credits')
+plt.ylabel('Final Result')
+plt.savefig('studiedcredits_grade')
 
 # Using Skicit-learn to split data into training and testing sets
 from sklearn.model_selection import train_test_split
