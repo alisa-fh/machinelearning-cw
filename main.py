@@ -1,19 +1,40 @@
-
 #DATA PREPARATION
 import pandas as pd
 # Read in data and display first 5 rows
 studentData = pd.read_csv('studentInfo.csv')
+print(studentData.groupby("final_result").count())
+
 # Remove student entries where results are "Withdrawn" or "Distinction"
+# This is because we are going to be doing binary classification
+# Between Pass and Fail
 studentData = studentData[studentData.final_result != "Withdrawn"]
 studentData = studentData[studentData.final_result != "Distinction"]
 
+#Dropping rows with missing data. Heatmap shows there is some data missing for imd_band
+studentData = studentData.dropna()
+
+
+# Comment out following block of code if original Pass and Fail data is wanted, rather than filtered so that
+# the Pass and Fail data is more balanced
+count = 0
+i = 0
+iList = []
+while count < 5022:
+    if studentData.iloc[i][11] == "Pass":
+        iList.append(studentData.index[i])
+        i += 1
+        count += 1
+    else:
+        i += 1
+studentData.drop(index = iList, inplace = True)
+
+# Replace values 'Fail' and 'Pass' in final_result with 0 and 1 respectively
 studentData["final_result"] = studentData["final_result"].replace("Fail", 0)
 studentData["final_result"] = studentData["final_result"].replace("Pass", 1)
+print(studentData.groupby("final_result").count())
 
-
-# One-hot encode the data using pandas get_dummies
+# One-hot encode the data using pandas get_dummies, so no categorical columns
 studentDataEnc = pd.get_dummies(studentData)
-
 
 # Use numpy to convert to arrays
 import numpy as np
@@ -35,66 +56,67 @@ import seaborn as sns
 sns.set(style="white")
 sns.set(style="whitegrid", color_codes=True)
 
-# Countplot of 0 (fail) vs 1 (pass)
-sns.countplot(x=labels, data = studentData, palette='hls')
-plt.savefig('countplot')
 
 # Mean of data with respect to final result
 meanData = studentDataEnc.groupby('final_result').mean()
 print('Mean Data:')
 print(meanData.head())
 
-# Heatmap to show where data is missing
+# UNCOMMENT BELOW FOR GRAPHS TO BE PRODUCED
+# # Countplot of 0 (fail) vs 1 (pass)
+# sns.countplot(x=labels, data = studentData, palette='hls')
+# plt.savefig('countplot')
+ # Heatmap to show where data is missing
 sns.heatmap(studentData.isnull(),yticklabels=False,cbar=False,cmap='viridis')
-
-table=pd.crosstab(studentData.gender, studentData.final_result)
-table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
-plt.title('Stacked Bar Chart of Gender vs Final Result')
-plt.xlabel('Gender')
-plt.ylabel('Final Result')
-plt.savefig('gender_grade')
-
-table=pd.crosstab(studentData.disability, studentData.final_result)
-table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
-plt.title('Stacked Bar Chart of disability vs Final Result')
-plt.xlabel('Disability')
-plt.ylabel('Final Result')
-plt.savefig('disability_grade')
-
-table=pd.crosstab(studentData.highest_education, studentData.final_result)
-table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
-plt.title('Stacked Bar Chart of Highest Education vs Final Result')
-plt.xlabel('Highest Education')
-plt.ylabel('Final Result')
-plt.savefig('highested_grade')
-
-table=pd.crosstab(studentData.region, studentData.final_result)
-table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
-plt.title('Stacked Bar Chart of Region vs Final Result')
-plt.xlabel('Region')
-plt.ylabel('Final Result')
-plt.savefig('region_grade')
-
-table=pd.crosstab(studentData.age_band, studentData.final_result)
-table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
-plt.title('Stacked Bar Chart of Age Band vs Final Result')
-plt.xlabel('Age Band')
-plt.ylabel('Final Result')
-plt.savefig('agebands_grade')
-
-table=pd.crosstab(studentData.imd_band, studentData.final_result)
-table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
-plt.title('Stacked Bar Chart of imd band vs Final Result')
-plt.xlabel('IMD Band')
-plt.ylabel('Final Result')
-plt.savefig('imdband_grade')
-
-table=pd.crosstab(studentData.num_of_prev_attempts, studentData.final_result)
-table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
-plt.title('Stacked Bar Chart of Previous Attempts vs Final Result')
-plt.xlabel('Previous attempts')
-plt.ylabel('Final Result')
-plt.savefig('prevattempts_grade')
+#
+# table=pd.crosstab(studentData.gender, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of Gender vs Final Result')
+# plt.xlabel('Gender')
+# plt.ylabel('Final Result')
+# plt.savefig('gender_grade')
+#
+# table=pd.crosstab(studentData.disability, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of disability vs Final Result')
+# plt.xlabel('Disability')
+# plt.ylabel('Final Result')
+# plt.savefig('disability_grade')
+#
+# table=pd.crosstab(studentData.highest_education, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of Highest Education vs Final Result')
+# plt.xlabel('Highest Education')
+# plt.ylabel('Final Result')
+# plt.savefig('highested_grade')
+#
+# table=pd.crosstab(studentData.region, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of Region vs Final Result')
+# plt.xlabel('Region')
+# plt.ylabel('Final Result')
+# plt.savefig('region_grade')
+#
+# table=pd.crosstab(studentData.age_band, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of Age Band vs Final Result')
+# plt.xlabel('Age Band')
+# plt.ylabel('Final Result')
+# plt.savefig('agebands_grade')
+#
+# table=pd.crosstab(studentData.imd_band, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of imd band vs Final Result')
+# plt.xlabel('IMD Band')
+# plt.ylabel('Final Result')
+# plt.savefig('imdband_grade')
+#
+# table=pd.crosstab(studentData.num_of_prev_attempts, studentData.final_result)
+# table.div(table.sum(1).astype(float), axis=0).plot(kind='bar', stacked=True)
+# plt.title('Stacked Bar Chart of Previous Attempts vs Final Result')
+# plt.xlabel('Previous attempts')
+# plt.ylabel('Final Result')
+# plt.savefig('prevattempts_grade')
 
 # Using Skicit-learn to split data into training and testing sets
 from sklearn.model_selection import train_test_split
@@ -139,10 +161,8 @@ export_graphviz(tree_small, out_file = 'small_tree.dot', feature_names = feature
 (graph, ) = pydot.graph_from_dot_file('small_tree.dot')
 graph.write_png('small_tree.png');
 
-
+# Making ROC curve
 from sklearn.metrics import roc_curve, auc
-
-
 
 Y_score = rf.predict_proba(test_features)[:,1]
 fpr = dict()
@@ -167,8 +187,6 @@ plt.show()
 
 #LOGISTIC REGRESSION
 
-
-
 from sklearn.linear_model import LogisticRegression
 
 #create an instance and fit the model
@@ -181,8 +199,29 @@ logmodel.fit(X_train, y_train)
 
 #predictions
 logPredictions = logmodel.predict(X_test)
+print(y_test[:10])
+print(logPredictions[:10])
 
 print(classification_report(y_test, logPredictions))
 
 print('confusion matrix')
 print(confusion_matrix(y_test, logPredictions))
+
+Y_score = rf.predict_proba(X_test)[:,1]
+fpr = dict()
+tpr = dict()
+fpr, tpr, _ = roc_curve(y_test, Y_score)
+roc_auc = dict()
+roc_auc = auc(fpr, tpr)
+
+# make the plot
+plt.figure(figsize=(10,10))
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlim([-0.05, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.grid(True)
+plt.plot(fpr, tpr, label='AUC = {0}'.format(roc_auc))
+plt.legend(loc="lower right", shadow=True, fancybox =True)
+plt.show()
