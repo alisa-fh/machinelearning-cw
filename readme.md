@@ -1,3 +1,5 @@
+# Second Year Machine Learning Coursework
+
 I have been investigating the use of two machine learning methods, Random Forest Classification (RFC) and Logistic Regression Classification (LRC) to predict the final result of a student. In the report [here](./report.pdf), I discuss and compare the two methods, in terms of their procedure and performance.
 
 Find the final python script [here](./classifier.py).
